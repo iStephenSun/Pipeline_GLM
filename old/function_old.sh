@@ -1,25 +1,5 @@
 #!/bin/bash
 
-
-#Load Configure.txt
-function load_config {
-    config_fn=$1
-    # config_fn='./configuration.txt' # first parameter - for user to change
-
-
-    expt_fn=`cat $config_fn | grep  expt_fn |awk -F '=' '{print$2}' `
-    cpu=`cat $config_fn | grep cpu |awk -F '=' '{print$2}' `
-
-    echo $expt_fn
-    echo $cpu
-}
-
-
-
-
-
-
-
 function dicom_folder_to_converted_dicom_with_TR {
     echo "dicom_folder_to_converted_dicom_with_TR"
     dicom_folder=$1 # the dicom folder that contains .IMA files
@@ -71,7 +51,6 @@ function expt_run_to_converted_dicom_with_new_onset_format {
     #subj_id="${method}_${expt}_$run"
     #glm_2nd_block $run_folder/epi+orig $run_folder/anat+orig $onset_file $column_stim1_label $subj_id $run_folder $cpu
 
-
 function glm_2nd_block {
      epi=$1
     anat=$2
@@ -116,7 +95,7 @@ function glm_2nd_block {
         -regress_stim_times $stim2 \
         -regress_stim_labels $label2 \
         -regress_basis "BLOCK(0.5,1)" \
-    -regress_apply_mask
+	-regress_apply_mask
         #-regress_reml_exec \
         #-volreg_align_to MIN_OUTLIER \
         #-mask_dilate 1 \
@@ -135,8 +114,6 @@ function glm_2nd_block {
 }
 
 
-
-# Step1 preprocess_1_run
 function preprocess_1_run {
     expt=$1
     output_folder=$2
@@ -216,57 +193,36 @@ function preprocess_1_run {
     date
 }
 
+function preprocess_many_runs {
+    expt=$1
+    parent_output_folder=$2
+    onset_file=$3
+    run_file=$4
+    cpu=$5
 
-
-# Step0 Main Function
-
-function main {
-# preprocess_many_runs 
-for expt in `cat $expt_fn | shyaml keys | tr -d '\r' `;do
-    echo 'runing' $expt
-    output_folder=res.$expt
-    echo "output_folder:"$output_folder
-
-    #Folder for save 
-    mkdir ./$output_folder
-    mkdir ./$output_folder/log
-    
-
-    #one onset.csv for on expt
-    onset_fn=`cat $expt_fn | shyaml get-value $expt.onset`
-    echo "onset_file :$onset_fn "
-
-
-    
-
-
-    for run in `cat $expt_fn| tr -d '-' | shyaml get-value $expt.runs`;do 
-        #process_1_run
+    for run in `grep -v '#' $run_file | cut -d ',' -f 1`; do 
+#step1 don'show notes; step2`` run $(command inside) first
         echo "MyAFNI: processing $expt $run"
         time=`date +%H%M`
-
-        echo "MyAFNI: processing $expt $run" > ./$output_folder/log/${expt}_${run}_${time}.log 
-        # preprocess_1_run $expt $output_folder $onset_fn $run $cpu > ./$output_folder/log/${expt}_${run}_${time}.log 2>&1
+        echo "onset_file :$onset_file "
+        preprocess_1_run $expt $parent_output_folder $onset_file $run $cpu > ${expt}_${run}_${time}.log 2>&1
+# output the bug_log
     done 
-
-
-
-done
-
+    
+# Sort out the intermediate files
+    mkdir by_products
+    mkdir log
+    mkdir stim
+    
+    mv output*${expt}* proc*${expt}* BLOCK*${expt}* TENT*${expt}* by_products/  #* wildcards
+    mv *.log log/
+    mv *stim*.txt stim/
 }
 
 
-# Excute Main - in example.sh
-
-
-load_config ./configuration.txt
-
-main
+function main {  
+   echo "main"
+}  
 
 
 
-
-# . ./function_pipeline.sh
-
-# bash ./function.sh - start a new sub bash,closed when finished
-# . ./  - start in current bash,can do more - subfunction in function.sh
