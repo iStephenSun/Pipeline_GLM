@@ -1,5 +1,5 @@
 #!/bin/bash
-. ./function_pipeline.sh
+. ./test.sh
 
 # bash ./function.sh - start a new sub bash,closed when finished
 # . ./  - start in current bash,can do more - subfunction in function.sh

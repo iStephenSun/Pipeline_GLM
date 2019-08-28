@@ -3,8 +3,12 @@ expt1:
    - run01
    - run02
    - run03
+ onset:
+  ../../../raw/doc/neo_Onset/20190611_onset.csv
 expt2:
   runs:
    - run04
    - run05
    - run06
+  onset:
+   ../../../raw/doc/neo_Onset/20190617_onset.csv

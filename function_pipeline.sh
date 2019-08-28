@@ -208,6 +208,7 @@ function preprocess_many_runs {
         preprocess_1_run $expt $parent_output_folder $onset_file $run $cpu > ${expt}_${run}_${time}.log 2>&1
 # output the bug_log
     done 
+    
 # Sort out the intermediate files
     mkdir by_products
     mkdir log
